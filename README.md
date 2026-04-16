@@ -1,4 +1,4 @@
-# 📊 Productivity AI — Personal Machine Learning Dashboard
+# Productivity AI — Personal Machine Learning Dashboard
 
 A full-stack **machine learning application** that tracks daily habits, stores data in a database, and predicts productivity using a trained model.
 
@@ -25,7 +25,7 @@ Users input daily behavior and receive:
 
 ---
 
-## ⚙️ Features
+## Features
 
 - Machine Learning prediction (Random Forest Regressor)
 - Interactive dashboard (Streamlit)
@@ -37,7 +37,7 @@ Users input daily behavior and receive:
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 - Python 
 - Streamlit 
@@ -47,7 +47,7 @@ Users input daily behavior and receive:
 
 ---
 
-## 🧠 Machine Learning Pipeline
+## Machine Learning Pipeline
 
 ### Input Features (X):
 - Sleep hours
@@ -65,7 +65,7 @@ Users input daily behavior and receive:
 
 ---
 
-## 🌳 Why Random Forest?
+## Why Random Forest?
 
 Random Forest was chosen because:
 
