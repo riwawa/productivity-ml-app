@@ -6,13 +6,13 @@ DB_NAME = "productivity.db"
 TABLE_NAME = "productivity"
 
 # =========================
-# 1. CONEXÃO SEGURA
+# CONEXÃO
 # =========================
 def get_connection():
     return sqlite3.connect(DB_NAME, check_same_thread=False)
 
 # =========================
-# 2. INICIALIZAR BANCO
+# CRIAR BANCO
 # =========================
 def init_db():
     conn = get_connection()
@@ -34,7 +34,7 @@ def init_db():
     conn.close()
 
 # =========================
-# 3. SALVAR DADOS
+# SALVAR DADOS
 # =========================
 def save_data(sleep, study, exercise, caffeine, humor, productivity):
     conn = get_connection()
@@ -50,7 +50,7 @@ def save_data(sleep, study, exercise, caffeine, humor, productivity):
     conn.close()
 
 # =========================
-# 4. CARREGAR DADOS
+# CARREGAR DADOS
 # =========================
 def load_data():
     conn = get_connection()
@@ -59,17 +59,28 @@ def load_data():
     return df
 
 # =========================
-# 5. MIGRAR CSV → SQLITE (RODA 1 VEZ)
+# MIGRAR CSV → DB (1x)
 # =========================
 def migrate_csv(csv_path="data.csv"):
     if not os.path.exists(csv_path):
         return
 
     conn = get_connection()
-
     df = pd.read_csv(csv_path)
 
-    # evita duplicação básica
+    # limpeza
+    df = df.dropna()
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+
+    df = df[["sleep", "study", "exercise", "caffeine", "humor", "productivity"]]
+
+    df["study"] = df["study"].astype(int)
+    df["exercise"] = df["exercise"].astype(int)
+    df["caffeine"] = df["caffeine"].astype(int)
+    df["humor"] = df["humor"].astype(int)
+    df["sleep"] = df["sleep"].astype(float)
+    df["productivity"] = df["productivity"].astype(float)
+
     df.to_sql(TABLE_NAME, conn, if_exists="append", index=False)
 
     conn.close()
@@ -79,7 +90,7 @@ def migrate_csv(csv_path="data.csv"):
         f.write("done")
 
 # =========================
-# 6. RODAR MIGRAÇÃO SEGURA
+# MIGRAÇÃO SEGURA
 # =========================
 def safe_migrate():
     if not os.path.exists("migrated.txt"):
