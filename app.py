@@ -44,9 +44,9 @@ model.fit(X, y)
 # =========================
 # UI
 # =========================
-st.title("📊 Productivity App")
+st.title("Productivity App")
 
-tab1, tab2 = st.tabs(["🧠 Predict", "📈 Dashboard"])
+tab1, tab2 = st.tabs(["> Predict", "> Dashboard"])
 
 # =========================
 # TAB 1 - PREDICT
