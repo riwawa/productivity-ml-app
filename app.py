@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-from db import init_db, save_data, load_data, safe_migrate
+from db import init_db, save_data, load_data, safe_migrate, seed_data
 
 # =========================
 # CONFIG
@@ -14,6 +14,7 @@ feature_order = ["sleep", "study", "exercise", "caffeine", "humor"]
 # =========================
 init_db()
 safe_migrate()
+seed_data();
 
 # =========================
 # LOAD DATA

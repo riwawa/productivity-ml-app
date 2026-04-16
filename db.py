@@ -59,7 +59,7 @@ def load_data():
     return df
 
 # =========================
-# MIGRAR CSV → DB (1x)
+# MIGRAR CSV (1x)
 # =========================
 def migrate_csv(csv_path="data.csv"):
     if not os.path.exists(csv_path):
@@ -68,24 +68,14 @@ def migrate_csv(csv_path="data.csv"):
     conn = get_connection()
     df = pd.read_csv(csv_path)
 
-    # limpeza
     df = df.dropna()
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-
     df = df[["sleep", "study", "exercise", "caffeine", "humor", "productivity"]]
-
-    df["study"] = df["study"].astype(int)
-    df["exercise"] = df["exercise"].astype(int)
-    df["caffeine"] = df["caffeine"].astype(int)
-    df["humor"] = df["humor"].astype(int)
-    df["sleep"] = df["sleep"].astype(float)
-    df["productivity"] = df["productivity"].astype(float)
 
     df.to_sql(TABLE_NAME, conn, if_exists="append", index=False)
 
     conn.close()
 
-    # marca como migrado
     with open("migrated.txt", "w") as f:
         f.write("done")
 
@@ -95,3 +85,25 @@ def migrate_csv(csv_path="data.csv"):
 def safe_migrate():
     if not os.path.exists("migrated.txt"):
         migrate_csv()
+
+# =========================
+# SEED INICIAL 
+# =========================
+def seed_data():
+    df = load_data()
+
+    if df.empty:
+        conn = get_connection()
+
+        sample = pd.DataFrame({
+            "sleep": [7, 6, 8, 5],
+            "study": [1, 0, 1, 1],
+            "exercise": [1, 1, 0, 0],
+            "caffeine": [1, 0, 1, 1],
+            "humor": [4, 3, 5, 2],
+            "productivity": [7, 5, 8, 4]
+        })
+
+        sample.to_sql(TABLE_NAME, conn, if_exists="append", index=False)
+
+        conn.close()
