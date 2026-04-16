@@ -15,6 +15,13 @@ init_db()
 df = load_data()
 
 # =========================
+# SAFE CHECK
+# =========================
+if df.empty or len(df) < 2:
+    st.warning("Not enough data to train the model. Please add more entries.")
+    st.stop()
+
+# =========================
 # TRAIN MODEL
 # =========================
 X = df.drop(["id", "productivity"], axis=1)
@@ -55,7 +62,7 @@ if st.button("Predict"):
 
     pred = model.predict(novo_dia)[0]
 
-    st.subheader(f"🔮 Predicted productivity: {pred:.2f}")
+    st.subheader(f"Predicted productivity: {pred:.2f}")
 
     if name:
         st.write(f"{name}, this is your expected productivity today.")
@@ -67,8 +74,8 @@ if st.button("Save today data"):
     save_data(sleep_hours, study, exercise, caffeine, humor, prod_real)
     st.success("Saved to database")
 
-    # atualizar dados após salvar
     df = load_data()
+    st.rerun()
 
 # =========================
 # DASHBOARD
