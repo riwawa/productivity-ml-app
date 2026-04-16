@@ -1,13 +1,19 @@
 import streamlit as st
 import pandas as pd
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 
-from db import init_db, save_data, load_data
+from db import init_db, save_data, load_data, safe_migrate
+
+# =========================
+# CONFIG
+# =========================
+feature_order = ["sleep", "study", "exercise", "caffeine", "humor"]
 
 # =========================
 # INIT DB
 # =========================
 init_db()
+safe_migrate()
 
 # =========================
 # LOAD DATA
@@ -24,10 +30,14 @@ if df.empty or len(df) < 2:
 # =========================
 # TRAIN MODEL
 # =========================
-X = df.drop(["id", "productivity"], axis=1)
+X = df[feature_order]
 y = df["productivity"]
 
-model = LinearRegression()
+model = RandomForestRegressor(
+    n_estimators=100,
+    random_state=42
+)
+
 model.fit(X, y)
 
 # =========================
@@ -48,16 +58,16 @@ prod_real = st.slider("Real productivity", 0, 10, 5)
 # =========================
 # CONVERT DATA
 # =========================
-study = 1 if study == "Yes" else 0
-exercise = 1 if exercise == "Yes" else 0
+study_val = 1 if study == "Yes" else 0
+exercise_val = 1 if exercise == "Yes" else 0
 
 # =========================
 # PREDICTION
 # =========================
 if st.button("Predict"):
     novo_dia = pd.DataFrame(
-        [[sleep_hours, study, exercise, caffeine, humor]],
-        columns=X.columns
+        [[sleep_hours, study_val, exercise_val, caffeine, humor]],
+        columns=feature_order
     )
 
     pred = model.predict(novo_dia)[0]
@@ -71,7 +81,15 @@ if st.button("Predict"):
 # SAVE DATA
 # =========================
 if st.button("Save today data"):
-    save_data(sleep_hours, study, exercise, caffeine, humor, prod_real)
+    save_data(
+        sleep_hours,
+        study_val,
+        exercise_val,
+        caffeine,
+        humor,
+        prod_real
+    )
+
     st.success("Saved to database")
 
     df = load_data()
@@ -82,20 +100,20 @@ if st.button("Save today data"):
 # =========================
 st.title("📊 Dashboard")
 
-st.line_chart(df["productivity"])
+if not df.empty:
+    st.line_chart(df["productivity"])
 
-st.subheader("Stats")
-st.write("Average:", df["productivity"].mean())
-st.write("Max:", df["productivity"].max())
-st.write("Min:", df["productivity"].min())
+    st.subheader("Stats")
+    st.write("Average:", df["productivity"].mean())
+    st.write("Max:", df["productivity"].max())
+    st.write("Min:", df["productivity"].min())
 
-st.subheader("Insights")
+    st.subheader("Insights")
 
-if df["exercise"].mean() > 0.5:
-    st.write("Exercise habit is strong")
+    corr = df.corr(numeric_only=True)["productivity"].sort_values(ascending=False)
 
-if df["study"].mean() > 0.5:
-    st.write("Study habit is strong")
+    st.write("📊 Correlation with productivity:")
+    st.write(corr)
 
-st.subheader("Correlations")
-st.write(df.corr(numeric_only=True)["productivity"])
+else:
+    st.info("No data to display yet.")
